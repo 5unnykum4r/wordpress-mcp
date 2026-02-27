@@ -39,6 +39,25 @@ add_action( 'wp_abilities_api_init', function () {
     $up  = array( 'readonly' => false, 'destructive' => false, 'idempotent' => true );
     $del = array( 'readonly' => false, 'destructive' => true, 'idempotent' => true );
 
+    // Helper: resolve author input (ID, login, email, or display name) to a user ID.
+    $resolve_author = function ( $author ) {
+        if ( is_int( $author ) || ctype_digit( (string) $author ) ) {
+            $user = get_userdata( (int) $author );
+            if ( $user ) return (int) $user->ID;
+            return new WP_Error( 'invalid_author', "No user found with ID {$author}." );
+        }
+        $author = sanitize_text_field( $author );
+        $user = get_user_by( 'login', $author );
+        if ( $user ) return (int) $user->ID;
+        $user = get_user_by( 'email', $author );
+        if ( $user ) return (int) $user->ID;
+        $user = get_user_by( 'slug', sanitize_title( $author ) );
+        if ( $user ) return (int) $user->ID;
+        $found = get_users( array( 'search' => $author, 'search_columns' => array( 'display_name' ), 'number' => 1 ) );
+        if ( ! empty( $found ) ) return (int) $found[0]->ID;
+        return new WP_Error( 'invalid_author', "No user found matching \"{$author}\". Pass a user ID, login, email, slug, or display name." );
+    };
+
     // Helper: resolve category names to IDs, creating missing ones.
     $resolve_cats = function ( array $names ) {
         $ids = array();
@@ -263,6 +282,7 @@ add_action( 'wp_abilities_api_init', function () {
                 'slug'=>array('type'=>'string','description'=>'URL slug. Auto-generated if omitted.'),
                 'status'=>array('type'=>'string','enum'=>array('publish','draft','pending','private','future'),'default'=>'draft'),
                 'post_type'=>array('type'=>'string','default'=>'post'),
+                'author'=>array('type'=>array('string','integer'),'description'=>'Author user ID, login, email, slug, or display name.'),
                 'date'=>array('type'=>'string','description'=>'Y-m-d H:i:s. Required for status=future.'),
                 'parent_id'=>array('type'=>'integer'),'menu_order'=>array('type'=>'integer'),
                 'categories'=>array('type'=>'array','items'=>array('type'=>'string'),'description'=>'Category names. Auto-created if missing.'),
@@ -272,13 +292,14 @@ add_action( 'wp_abilities_api_init', function () {
                 'rank_math'=>$rank_math_schema,
             ), 'additionalProperties'=>false,
         ),
-        'execute_callback' => function ( $input = array() ) use ( $resolve_cats, $apply_rank_math ) {
+        'execute_callback' => function ( $input = array() ) use ( $resolve_cats, $resolve_author, $apply_rank_math ) {
             $input = is_array($input)?$input:array();
             $pd = array('post_title'=>sanitize_text_field($input['title']??''),'post_content'=>wp_slash($input['content']??''),'post_excerpt'=>sanitize_textarea_field($input['excerpt']??''),'post_status'=>$input['status']??'draft','post_type'=>$input['post_type']??'post');
             if (!empty($input['slug'])) $pd['post_name']=sanitize_title($input['slug']);
             if (!empty($input['date'])) $pd['post_date']=sanitize_text_field($input['date']);
             if (!empty($input['parent_id'])) $pd['post_parent']=(int)$input['parent_id'];
             if (isset($input['menu_order'])) $pd['menu_order']=(int)$input['menu_order'];
+            if (isset($input['author'])) { $aid=$resolve_author($input['author']); if(is_wp_error($aid)) return $aid; $pd['post_author']=$aid; }
             $id = wp_insert_post($pd,true);
             if (is_wp_error($id)) return $id;
             if (!empty($input['categories'])&&is_array($input['categories'])) { $cids=$resolve_cats($input['categories']); if($cids) wp_set_post_categories($id,$cids); }
@@ -305,6 +326,7 @@ add_action( 'wp_abilities_api_init', function () {
                 'title'=>array('type'=>'string'),'content'=>array('type'=>'string'),
                 'excerpt'=>array('type'=>'string'),'slug'=>array('type'=>'string'),
                 'status'=>array('type'=>'string','enum'=>array('publish','draft','pending','private','future')),
+                'author'=>array('type'=>array('string','integer'),'description'=>'Author user ID, login, email, slug, or display name.'),
                 'date'=>array('type'=>'string'),'parent_id'=>array('type'=>'integer'),'menu_order'=>array('type'=>'integer'),
                 'categories'=>array('type'=>'array','items'=>array('type'=>'string'),'description'=>'Replaces existing. Auto-creates missing.'),
                 'tags'=>array('type'=>'array','items'=>array('type'=>'string'),'description'=>'Replaces existing.'),
@@ -313,7 +335,7 @@ add_action( 'wp_abilities_api_init', function () {
                 'rank_math'=>$rank_math_schema,
             ), 'additionalProperties'=>false,
         ),
-        'execute_callback' => function ( $input = array() ) use ( $resolve_cats, $apply_rank_math ) {
+        'execute_callback' => function ( $input = array() ) use ( $resolve_cats, $resolve_author, $apply_rank_math ) {
             $input = is_array($input)?$input:array();
             $id = (int)($input['post_id']??0);
             if (!get_post($id)) return new WP_Error('not_found',"Post {$id} not found.");
@@ -323,6 +345,7 @@ add_action( 'wp_abilities_api_init', function () {
             if (isset($input['excerpt'])) $pd['post_excerpt']=sanitize_textarea_field($input['excerpt']);
             if (isset($input['slug']))    $pd['post_name']=sanitize_title($input['slug']);
             if (isset($input['status']))  $pd['post_status']=$input['status'];
+            if (isset($input['author']))  { $aid=$resolve_author($input['author']); if(is_wp_error($aid)) return $aid; $pd['post_author']=$aid; }
             if (isset($input['date']))    $pd['post_date']=sanitize_text_field($input['date']);
             if (isset($input['parent_id'])) $pd['post_parent']=(int)$input['parent_id'];
             if (isset($input['menu_order'])) $pd['menu_order']=(int)$input['menu_order'];

@@ -67,6 +67,7 @@ Create a new post or page with all fields and SEO.
 | `slug` | string | no | auto | URL slug |
 | `status` | string | no | draft | publish, draft, pending, private, future |
 | `post_type` | string | no | post | post or page |
+| `author` | string\|int | no | current user | Author user ID, login, email, slug, or display name |
 | `date` | string | no | now | Y-m-d H:i:s (required for future) |
 | `parent_id` | int | no | — | Parent page ID |
 | `menu_order` | int | no | — | Sort order for pages |
@@ -104,9 +105,10 @@ Create a new post or page with all fields and SEO.
 
 Update any fields on an existing post. Only provided fields are changed.
 
-**Input:** Same as create-post, but with `post_id` (required) instead of `title` being required. All other fields are optional.
+**Input:** Same as create-post, but with `post_id` (required) instead of `title` being required. All other fields are optional (including `author`).
 
 **Special behaviors:**
+- `author` accepts a user ID, login, email, slug, or display name (e.g. `"Sunny Kumar"` or `2`)
 - `categories` replaces all existing categories
 - `tags` replaces all existing tags
 - `featured_image_id: 0` removes the featured image
@@ -117,6 +119,7 @@ Update any fields on an existing post. Only provided fields are changed.
 
 **Examples:**
 - Publish a draft: `{ post_id: 123, status: "publish" }`
+- Change author: `{ post_id: 123, author: "Sunny Kumar" }`
 - Change slug: `{ post_id: 123, slug: "new-better-slug" }`
 - Update SEO only: `{ post_id: 123, rank_math: { description: "New meta description" } }`
 

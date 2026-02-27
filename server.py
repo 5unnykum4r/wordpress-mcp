@@ -235,6 +235,7 @@ def create_post(
     slug: Annotated[str | None, Field(description="URL slug, auto-generated if omitted")] = None,
     status: Annotated[str, Field(description="publish, draft, pending, private, future")] = "draft",
     post_type: Annotated[str, Field(description="post or page")] = "post",
+    author: Annotated[str | int | None, Field(description="Author user ID, login, email, slug, or display name")] = None,
     date: Annotated[str | None, Field(description="Y-m-d H:i:s, required for future")] = None,
     parent_id: Annotated[int | None, Field(description="Parent page ID")] = None,
     menu_order: Annotated[int | None, Field(description="Sort order for pages")] = None,
@@ -247,7 +248,7 @@ def create_post(
     """Create a new post or page with content, SEO, categories, tags, and featured image."""
     return call_wordpress(site, "site/create-post", {
         "title": title, "content": content, "excerpt": excerpt, "slug": slug,
-        "status": status, "post_type": post_type, "date": date,
+        "status": status, "post_type": post_type, "author": author, "date": date,
         "parent_id": parent_id, "menu_order": menu_order,
         "categories": categories, "tags": tags,
         "featured_image_id": featured_image_id,
@@ -264,6 +265,7 @@ def update_post(
     excerpt: Annotated[str | None, Field(description="New excerpt")] = None,
     slug: Annotated[str | None, Field(description="New URL slug")] = None,
     status: Annotated[str | None, Field(description="publish, draft, pending, private, future")] = None,
+    author: Annotated[str | int | None, Field(description="Author user ID, login, email, slug, or display name")] = None,
     date: Annotated[str | None, Field(description="Y-m-d H:i:s")] = None,
     parent_id: Annotated[int | None, Field(description="Parent page ID")] = None,
     menu_order: Annotated[int | None, Field(description="Sort order")] = None,
@@ -276,7 +278,7 @@ def update_post(
     """Update any fields on an existing post/page. Only provided fields change."""
     return call_wordpress(site, "site/update-post", {
         "post_id": post_id, "title": title, "content": content, "excerpt": excerpt,
-        "slug": slug, "status": status, "date": date,
+        "slug": slug, "status": status, "author": author, "date": date,
         "parent_id": parent_id, "menu_order": menu_order,
         "categories": categories, "tags": tags,
         "featured_image_id": featured_image_id,

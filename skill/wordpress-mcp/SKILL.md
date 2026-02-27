@@ -50,8 +50,8 @@ All tools require `site` as the first parameter.
 |------|--------|------------|
 | `list_posts` | List posts/pages | status, category, tag, search, post_type, page |
 | `read_post` | Read full post + SEO | post_id |
-| `create_post` | Create post/page | title, content, slug, status, categories, tags, rank_math |
-| `update_post` | Update post/page | post_id + any fields to change |
+| `create_post` | Create post/page | title, content, slug, status, author, categories, tags, rank_math |
+| `update_post` | Update post/page | post_id + any fields to change (incl. author) |
 | `delete_post` | Trash/delete | post_id, permanent |
 | `bulk_update_status` | Bulk status change | post_ids[], status |
 | `list_revisions` | Revision history | post_id |
