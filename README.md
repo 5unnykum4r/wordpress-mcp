@@ -96,6 +96,12 @@ cp sites.json.example sites.json
 Then install the skill for tool documentation:
 
 ```bash
+npx skills add 5unnykum4r/wordpress-mcp
+```
+
+Or manually symlink:
+
+```bash
 ln -s /path/to/wordpress-mcp/skill/wordpress-mcp ~/.claude/skills/wordpress-mcp
 ```
 

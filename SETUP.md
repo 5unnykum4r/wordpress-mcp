@@ -132,19 +132,25 @@ Replace the path with the actual absolute path to `server.py`.
 
 The skill gives Claude Code tool documentation and workflow guidance so it knows how to use the MCP tools effectively.
 
-**Option A: Symlink (recommended — auto-updates)**
+**Option A: Skills CLI (easiest)**
+
+```bash
+npx skills add 5unnykum4r/wordpress-mcp
+```
+
+**Option B: Symlink (auto-updates)**
 
 ```bash
 ln -s /absolute/path/to/wordpress-mcp/skill/wordpress-mcp ~/.claude/skills/wordpress-mcp
 ```
 
-**Option B: Copy**
+**Option C: Copy**
 
 ```bash
 cp -r /absolute/path/to/wordpress-mcp/skill/wordpress-mcp ~/.claude/skills/wordpress-mcp
 ```
 
-**Option C: Project-level skill**
+**Option D: Project-level skill**
 
 ```bash
 mkdir -p .claude/skills
