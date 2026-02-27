@@ -1,0 +1,6 @@
+{
+    "require": {
+        "wordpress/abilities-api": "^0.4.0",
+        "wordpress/mcp-adapter": "^0.4.1"
+    }
+}

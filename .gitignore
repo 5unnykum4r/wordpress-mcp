@@ -1,0 +1,23 @@
+# Credentials
+sites.json
+
+# PHP dependencies
+vendor/
+mcp-vendor.zip
+composer.phar
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
