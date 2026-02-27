@@ -7,6 +7,27 @@ description: Manage WordPress sites via MCP. Use when the user asks to create, r
 
 Manage WordPress sites through a single Python MCP proxy server (`wordpress` in `~/.claude.json`). All tools require a `site` parameter identifying the target site. Sites are configured in `sites.json`.
 
+## Setup
+
+This skill requires the WordPress MCP server. If the `wordpress` MCP tools are not yet available, set up the full project from **https://github.com/5unnykum4r/wordpress-mcp**:
+
+1. Clone the repo and install the PHP adapter on your WordPress site (`wordpress/` directory)
+2. Create a WordPress Application Password and add your site to `sites.json`
+3. Add the MCP server to `~/.claude.json`:
+```json
+{
+  "mcpServers": {
+    "wordpress": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--with", "fastmcp", "--with", "httpx", "python", "/path/to/wordpress-mcp/server.py"]
+    }
+  }
+}
+```
+
+See `SETUP.md` in the repo for the full step-by-step guide.
+
 ## How It Works
 
 A Python FastMCP server proxies tool calls to any WordPress site:
